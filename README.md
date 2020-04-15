@@ -75,3 +75,7 @@ But Graphql gives an error:
 ```
 give an error "message": "Post does not exist (1)",
 ```
+
+## Note
+
+The services should return promises for type consistency with the loaders, but it doesn't seem to be relevant for this error.
