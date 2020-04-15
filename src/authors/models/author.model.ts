@@ -7,8 +7,11 @@ export class Author {
   id: number;
 
   @Field({ nullable: true })
-  name?: string;
+  name: string;
 
-  @Field(() => [Post])
+  // An author can have any number of posts including none
+  // The posts field is only exposed to graphql but not implemented in the database
+  // The ManyToOne relation is done by a foreign key on the Post model
+  @Field(() => [Post], { nullable: 'items' })
   posts?: Post[];
 }

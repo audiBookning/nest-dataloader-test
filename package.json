@@ -28,6 +28,8 @@
     "apollo-server-express": "^2.12.0",
     "graphql": "^15.0.0",
     "graphql-tools": "^5.0.0",
+    "nestjs-graphql-dataloader": "^0.1.27",
+    "ramda": "^0.27.0",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.5.4"

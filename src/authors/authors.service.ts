@@ -17,4 +17,13 @@ export class AuthorsService {
   findOneById(id: number) {
     return this.authorList.find(a => a.id === id);
   }
+
+  findAllByIds(keys: any[]) {
+    console.log('AuthorsService findAllByIds keys: ', keys);
+    const authorsByIds = this.authorList.filter(author =>
+      keys.includes(author.id),
+    );
+    console.log('AuthorsService findAllByIds authorsByIds: ', authorsByIds);
+    return authorsByIds;
+  }
 }
