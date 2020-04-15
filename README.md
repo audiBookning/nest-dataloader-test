@@ -68,13 +68,14 @@ Error:
 
 ## Order the posts by author id
 
-Used Ramda as an alternative to order the posts by author id.
+I used Ramda (for expediency and testing) as an alternative to order the posts by author id.
 The function that implements it is findByAuthorsIdsRamda in PostsService and should be called in PostLoader
 But Graphql gives an error:
 
 ```
-give an error "message": "Post does not exist (1)",
+"message": "Post does not exist (1)",
 ```
+
 
 ## Note
 
