@@ -1,12 +1,41 @@
 # Test
 
-Repo with a temporary hack for using Dataloader.load in nestjs-graphql-dataloader
+Repo with a temporary hack for using Dataloader.load in [nestjs-graphql-dataloader](https://github.com/TreeMan360/nestjs-graphql-dataloader) for SQL OneToMany relationships.
 
-Trying to implement [nestjs-graphql-dataloader](https://github.com/TreeMan360/nestjs-graphql-dataloader)
+Related Issue: [Empty array in field return an error](https://github.com/TreeMan360/nestjs-graphql-dataloader/issues/2#issuecomment-614276632)
 
 ## Development start script
 
 npm run start:dev
+
+## PostLoader
+
+- not a hack
+- not used in the code
+
+PostLoader use generateDataLoader() directly by implementing NestDataLoader and bypassing ensureOrder. The ordering will have to be done on the Loader.
+
+## PostOrderedLoader
+
+- a hack
+
+Used in AuthorsResolver in the @ResolveField(() => Post)
+
+- Uses propertyKey to pass the 'authorId'.
+- Uses returnType to indicate the type of ordering to implement.
+- ReturnType is an enum. A simple string might be better?
+
+```typescript
+protected getOptions = () => {
+    return {
+      query: (keys: Array<Post['id']>) => {
+        return this.postsService.findByAuthorsIds(keys);
+      },
+      returnType: ReturnType.Array,
+      propertyKey: 'authorId',
+    };
+  };
+```
 
 ## Entities
 
