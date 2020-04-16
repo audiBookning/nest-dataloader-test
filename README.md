@@ -1,4 +1,6 @@
-# nestjs-graphql-dataloader Hack for Dataloader.load
+# Test
+
+Repo with a temporary hack for using Dataloader.load in nestjs-graphql-dataloader
 
 Trying to implement [nestjs-graphql-dataloader](https://github.com/TreeMan360/nestjs-graphql-dataloader)
 
