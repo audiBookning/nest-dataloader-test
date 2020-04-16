@@ -9,9 +9,9 @@ import { AuthorsResolver } from './authors/authors.resolver';
 import { AuthorsService } from './authors/authors.service';
 import { DataLoaderInterceptor } from './nestjs-graphql-dataloader';
 import { PostLoader } from './posts/PostLoader';
-import { PostOrderedLoader } from './posts/PostOrderedLoader';
 import { PostsResolver } from './posts/posts.resolver';
 import { PostsService } from './posts/posts.service';
+import { PostsByAuthorIdLoader } from './posts/PostsByAuthorIdLoader';
 
 @Module({
   imports: [
@@ -27,7 +27,7 @@ import { PostsService } from './posts/posts.service';
     AuthorsService,
     PostsService,
     PostLoader,
-    PostOrderedLoader,
+    PostsByAuthorIdLoader,
     AuthorLoader,
     {
       provide: APP_INTERCEPTOR,

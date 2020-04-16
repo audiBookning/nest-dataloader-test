@@ -9,7 +9,7 @@ import {
 import * as DataLoader from 'dataloader';
 import { Loader } from '../nestjs-graphql-dataloader';
 import { Post } from '../posts/models/post.model';
-import { PostOrderedLoader } from '../posts/PostOrderedLoader';
+import { PostsByAuthorIdLoader } from '../posts/PostsByAuthorIdLoader';
 import { AuthorsService } from './authors.service';
 import { Author } from './models/author.model';
 
@@ -30,7 +30,7 @@ export class AuthorsResolver {
   @ResolveField(() => Post)
   posts(
     @Parent() { id }: Author,
-    @Loader(PostOrderedLoader) postLoader: DataLoader<Post['id'], Post>,
+    @Loader(PostsByAuthorIdLoader) postLoader: DataLoader<Post['id'], Post>,
   ) {
     return postLoader.load(id);
   }

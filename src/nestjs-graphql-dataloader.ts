@@ -145,20 +145,14 @@ export const ensureOrderObject = options => {
   });
 };
 
-export enum ReturnType {
-  Object,
-  Array,
-}
-
 interface IOrderedNestDataLoaderOptions<ID, Type> {
   propertyKey?: string;
   query: (keys: readonly ID[]) => Promise<Type[]>;
   typeName?: string;
-  returnType?: ReturnType;
 }
 
 // tslint:disable-next-line: max-classes-per-file
-export abstract class OrderedNestDataLoader<ID, Type>
+export abstract class OrderedArrayOfObjectDataLoader<ID, Type>
   implements NestDataLoader<ID, Type> {
   protected abstract getOptions: () => IOrderedNestDataLoaderOptions<ID, Type>;
 
@@ -170,12 +164,32 @@ export abstract class OrderedNestDataLoader<ID, Type>
     options: IOrderedNestDataLoaderOptions<ID, Type>,
   ): DataLoader<ID, Type> {
     const defaultTypeName = this.constructor.name.replace('Loader', '');
-    const ensureOrderFn =
-      options.returnType === ReturnType.Array
-        ? ensureOrderArray
-        : ensureOrderObject;
     return new DataLoader<ID, Type>(async keys => {
-      return ensureOrderFn({
+      return ensureOrderObject({
+        docs: await options.query(keys),
+        keys,
+        prop: options.propertyKey || 'id',
+        error: keyValue =>
+          `${options.typeName || defaultTypeName} does not exist (${keyValue})`,
+      });
+    });
+  }
+}
+
+export abstract class OrderedArrayOfArrayDataLoader<ID, Type>
+  implements NestDataLoader<ID, Type> {
+  protected abstract getOptions: () => IOrderedNestDataLoaderOptions<ID, Type>;
+
+  public generateDataLoader() {
+    return this.createLoader(this.getOptions());
+  }
+
+  protected createLoader(
+    options: IOrderedNestDataLoaderOptions<ID, Type>,
+  ): DataLoader<ID, Type> {
+    const defaultTypeName = this.constructor.name.replace('Loader', '');
+    return new DataLoader<ID, Type>(async keys => {
+      return ensureOrderArray({
         docs: await options.query(keys),
         keys,
         prop: options.propertyKey || 'id',

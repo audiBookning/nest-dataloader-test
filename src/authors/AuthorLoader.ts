@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { OrderedNestDataLoader } from '../nestjs-graphql-dataloader';
+import { OrderedArrayOfObjectDataLoader } from '../nestjs-graphql-dataloader';
 import { AuthorsService } from './authors.service';
 import { Author } from './models/author.model';
 
 @Injectable()
-export class AuthorLoader extends OrderedNestDataLoader<Author['id'], Author> {
+export class AuthorLoader extends OrderedArrayOfObjectDataLoader<
+  Author['id'],
+  Author
+> {
   constructor(private readonly authorsService: AuthorsService) {
     super();
   }
