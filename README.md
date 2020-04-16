@@ -1,4 +1,4 @@
-# nestjs-graphql-dataloader Test
+# nestjs-graphql-dataloader Hack for Dataloader.load
 
 Trying to implement [nestjs-graphql-dataloader](https://github.com/TreeMan360/nestjs-graphql-dataloader)
 
@@ -47,8 +47,6 @@ type Post {
 
 ## Query
 
-````
-
 ```graphql
 {
   findAllAuthors {
@@ -60,4 +58,4 @@ type Post {
     }
   }
 }
-````
+```
