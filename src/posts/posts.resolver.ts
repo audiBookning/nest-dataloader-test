@@ -7,9 +7,9 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import * as DataLoader from 'dataloader';
-import { Loader } from 'nestjs-graphql-dataloader';
 import { AuthorLoader } from '../authors/AuthorLoader';
 import { Author } from '../authors/models/author.model';
+import { Loader } from '../nestjs-graphql-dataloader';
 import { Post } from './models/post.model';
 import { PostsService } from './posts.service';
 
@@ -27,18 +27,14 @@ export class PostsResolver {
     return this.postsService.findOneById(id);
   }
 
-  @ResolveField()
-  async author(
-    @Parent() post: Post,
+  @ResolveField(() => Author)
+  author(
+    @Parent() { authorId }: Post,
     @Loader(AuthorLoader) authorLoader: DataLoader<Author['id'], Author>,
   ) {
-    const { authorId } = post;
     if (!authorId) {
       return null;
     }
-    console.log('PostsResolver author authorId: ', authorId);
-    const authorReturn = await authorLoader.load(authorId);
-    console.log('PostsResolver author authorReturn: ', authorReturn);
-    return authorReturn;
+    return authorLoader.load(authorId);
   }
 }

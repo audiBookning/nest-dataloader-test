@@ -35,6 +35,6 @@ export const PostMock: Post[] = [
   {
     id: 4,
     title: 'P-t4',
-    authorId: 3,
+    authorId: 2,
   },
 ];

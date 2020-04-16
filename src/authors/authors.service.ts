@@ -19,11 +19,9 @@ export class AuthorsService {
   }
 
   findAllByIds(keys: any[]) {
-    console.log('AuthorsService findAllByIds keys: ', keys);
     const authorsByIds = this.authorList.filter(author =>
       keys.includes(author.id),
     );
-    console.log('AuthorsService findAllByIds authorsByIds: ', authorsByIds);
-    return authorsByIds;
+    return Promise.resolve(authorsByIds);
   }
 }

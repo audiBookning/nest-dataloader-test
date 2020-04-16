@@ -7,7 +7,7 @@ export class Post {
   id: number;
 
   @Field()
-  title: string;
+  title?: string;
 
   // OneToMany relation exposed to graphql
   @Field(() => Author)

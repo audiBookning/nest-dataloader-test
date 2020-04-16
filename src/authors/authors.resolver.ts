@@ -6,8 +6,10 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { Loader } from 'nestjs-graphql-dataloader';
-import { PostLoader } from '../posts/PostLoader';
+import * as DataLoader from 'dataloader';
+import { Loader } from '../nestjs-graphql-dataloader';
+import { Post } from '../posts/models/post.model';
+import { PostOrderedLoader } from '../posts/PostOrderedLoader';
 import { AuthorsService } from './authors.service';
 import { Author } from './models/author.model';
 
@@ -25,12 +27,11 @@ export class AuthorsResolver {
     return this.authorsService.findOneById(id);
   }
 
-  @ResolveField()
-  async posts(@Parent() author: Author, @Loader(PostLoader) postLoader) {
-    const { id } = author;
-    console.log('AuthorsResolver posts id: ', id);
-    const postsReturn = await postLoader.load(id);
-    console.log('AuthorsResolver posts postsReturn: ', postsReturn);
-    return postsReturn;
+  @ResolveField(() => Post)
+  posts(
+    @Parent() { id }: Author,
+    @Loader(PostOrderedLoader) postLoader: DataLoader<Post['id'], Post>,
+  ) {
+    return postLoader.load(id);
   }
 }

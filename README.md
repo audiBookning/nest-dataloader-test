@@ -45,13 +45,9 @@ type Post {
 }
 ```
 
-## Query with error
+## Query
 
-Error:
-
-```
-"message": "Expected Iterable, but did not find one for field \"Author.posts\".",
-```
+````
 
 ```graphql
 {
@@ -64,18 +60,4 @@ Error:
     }
   }
 }
-```
-
-## Order the posts by author id
-
-Used Ramda as an alternative to order the posts by author id.
-The function that implements it is findByAuthorsIdsRamda in PostsService and should be called in PostLoader
-But Graphql gives an error:
-
-```
-give an error "message": "Post does not exist (1)",
-```
-
-## Note
-
-The services should return promises for type consistency with the loaders, but it doesn't seem to be relevant for this error.
+````

@@ -3,6 +3,16 @@ import { groupBy, map } from 'ramda';
 import { PostMock } from '../mock/mock';
 import { Post } from './models/post.model';
 
+function groupByJS(xs: any[], f) {
+  return xs.reduce(
+    (previousValue, currentValue, currentIndex, array, k = f(currentValue)) => (
+      (previousValue[k] || (previousValue[k] = [])).push(currentValue),
+      previousValue
+    ),
+    {},
+  );
+}
+
 @Injectable()
 export class PostsService {
   postList: Post[];
@@ -22,14 +32,26 @@ export class PostsService {
   }
 
   findByAuthorsIds(keys: number[]) {
-    return this.postList.filter(post => keys.some(el => el === post.authorId));
+    return Promise.resolve(
+      this.postList.filter(post => keys.some(el => el === post.authorId)),
+    );
   }
 
-  findByAuthorsIdsRamda(keys: number[]) {
+  findByAuthorsIdsJS(keys: readonly number[]) {
+    const posts = this.postList.filter(post =>
+      keys.some(el => el === post.authorId),
+    );
+    const groupedById = groupByJS(posts, post => post.authorId);
+    const orderedAuthors = keys.map(key => groupedById[key]);
+    return Promise.resolve(orderedAuthors);
+  }
+
+  findByAuthorsIdsRamda(keys: readonly number[]) {
     const posts = this.postList.filter(post =>
       keys.some(el => el === post.authorId),
     );
     const groupedById = groupBy(post => post.authorId, posts);
-    return map(key => groupedById[key], keys);
+    const orderedAuthors = map(key => groupedById[key] || [], keys);
+    return Promise.resolve(orderedAuthors);
   }
 }
