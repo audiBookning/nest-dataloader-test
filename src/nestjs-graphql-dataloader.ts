@@ -15,7 +15,6 @@ import { Observable } from 'rxjs';
  * This interface will be used to generate the initial data loader.
  * The concrete implementation should be added as a provider to your module.
  */
-// tslint:disable-next-line: interface-name
 export interface NestDataLoader<ID, Type> {
   /**
    * Should return a new instance of dataloader each time
@@ -96,55 +95,6 @@ export const Loader = createParamDecorator(
   },
 );
 
-// REF: https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore#_groupby
-// INFO: Not the best choice for performance,
-// There other algorithms, but probably not much urgency to change yet
-// Underscore and Lodash are many times better, followed farter away by Ramda
-// REF: https://www.measurethat.net/Benchmarks/Show/7929/2/groupby-100k-ramda-underscore-arrayreduce
-const groupBy = (arr: any[], f) => {
-  return arr.reduce(
-    (previousValue, currentValue, currentIndex, array, k = f(currentValue)) => (
-      (previousValue[k] || (previousValue[k] = [])).push(currentValue),
-      previousValue
-    ),
-    {},
-  );
-};
-
-// https://github.com/graphql/dataloader/issues/66#issuecomment-386252044
-export const ensureOrderArray = options => {
-  const {
-    docs,
-    keys,
-    prop,
-    error = key => `Document does not exist (${key})`,
-  } = options;
-  // TODO: implement error handling
-  const groupedById = groupBy(docs, doc => doc[prop]);
-  return keys.map(key => groupedById[key] || []);
-};
-
-export const ensureOrderObject = options => {
-  const {
-    docs,
-    keys,
-    prop,
-    error = key => `Document does not exist (${key})`,
-  } = options;
-  // Put documents (docs) into a map where key is a document's ID or some
-  // property (prop) of a document and value is a document.
-  const docsMap = new Map();
-  docs.forEach(doc => docsMap.set(doc[prop], doc));
-  // Loop through the keys and for each one retrieve proper document. For not
-  // existing documents generate an error.
-  return keys.map(key => {
-    return (
-      docsMap.get(key) ||
-      new Error(typeof error === 'function' ? error(key) : error)
-    );
-  });
-};
-
 interface IOrderedNestDataLoaderOptions<ID, Type> {
   propertyKey?: string;
   query: (keys: readonly ID[]) => Promise<Type[]>;
@@ -165,13 +115,34 @@ export abstract class OrderedArrayOfObjectDataLoader<ID, Type>
   ): DataLoader<ID, Type> {
     const defaultTypeName = this.constructor.name.replace('Loader', '');
     return new DataLoader<ID, Type>(async keys => {
-      return ensureOrderObject({
+      return this.ensureOrder({
         docs: await options.query(keys),
         keys,
         prop: options.propertyKey || 'id',
         error: keyValue =>
           `${options.typeName || defaultTypeName} does not exist (${keyValue})`,
       });
+    });
+  }
+
+  protected ensureOrder(options) {
+    const {
+      docs,
+      keys,
+      prop,
+      error = key => `Document does not exist (${key})`,
+    } = options;
+    // Put documents (docs) into a map where key is a document's ID or some
+    // property (prop) of a document and value is a document.
+    const docsMap = new Map();
+    docs.forEach(doc => docsMap.set(doc[prop], doc));
+    // Loop through the keys and for each one retrieve proper document. For not
+    // existing documents generate an error.
+    return keys.map(key => {
+      return (
+        docsMap.get(key) ||
+        new Error(typeof error === 'function' ? error(key) : error)
+      );
     });
   }
 }
@@ -189,7 +160,7 @@ export abstract class OrderedArrayOfArrayDataLoader<ID, Type>
   ): DataLoader<ID, Type> {
     const defaultTypeName = this.constructor.name.replace('Loader', '');
     return new DataLoader<ID, Type>(async keys => {
-      return ensureOrderArray({
+      return this.ensureOrder({
         docs: await options.query(keys),
         keys,
         prop: options.propertyKey || 'id',
@@ -197,5 +168,41 @@ export abstract class OrderedArrayOfArrayDataLoader<ID, Type>
           `${options.typeName || defaultTypeName} does not exist (${keyValue})`,
       });
     });
+  }
+
+  // https://github.com/graphql/dataloader/issues/66#issuecomment-386252044
+  protected ensureOrder(options) {
+    const {
+      docs,
+      keys,
+      prop,
+      // TODO: implement error handling
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      error = key => `Document does not exist (${key})`,
+    } = options;
+
+    // REF: https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore#_groupby
+    // INFO: Not the best choice for performance,
+    // There other algorithms, but probably not much urgency to change yet
+    // Underscore and Lodash are many times better, followed farter away by Ramda
+    // REF: https://www.measurethat.net/Benchmarks/Show/7929/2/groupby-100k-ramda-underscore-arrayreduce
+    const groupBy = (arr: any[], f) => {
+      return arr.reduce(
+        (
+          previousValue,
+          currentValue,
+          currentIndex,
+          array,
+          k = f(currentValue),
+        ) => (
+          (previousValue[k] || (previousValue[k] = [])).push(currentValue),
+          previousValue
+        ),
+        {},
+      );
+    };
+
+    const groupedById = groupBy(docs, doc => doc[prop]);
+    return keys.map(key => groupedById[key] || []);
   }
 }
