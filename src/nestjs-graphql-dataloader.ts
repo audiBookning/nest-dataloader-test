@@ -181,28 +181,29 @@ export abstract class OrderedArrayOfArrayDataLoader<ID, Type>
       error = key => `Document does not exist (${key})`,
     } = options;
 
+    // INFO: This code comes from Rambda. It has a similar speed to Ramda
+    // REF: https://github.com/selfrefactor/rambda/blob/master/src/groupBy.js
+    // INFO: Another alternative. Not the best choice for performance,
     // REF: https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore#_groupby
-    // INFO: Not the best choice for performance,
-    // There other algorithms, but probably not much urgency to change yet
+    // INFO: There are other algorithms, but probably not much urgency to change yet
     // Underscore and Lodash are many times better, followed farter away by Ramda
     // REF: https://www.measurethat.net/Benchmarks/Show/7929/2/groupby-100k-ramda-underscore-arrayreduce
-    const groupBy = (arr: any[], f) => {
-      return arr.reduce(
-        (
-          previousValue,
-          currentValue,
-          currentIndex,
-          array,
-          k = f(currentValue),
-        ) => (
-          (previousValue[k] || (previousValue[k] = [])).push(currentValue),
-          previousValue
-        ),
-        {},
-      );
+    const groupBy = (fn, list) => {
+      // TODO: arguments.length buggy...
+      // if (arguments.length === 1) return _list => groupBy(fn, _list);
+      const result = {};
+      for (let i = 0; i < list.length; i++) {
+        const item = list[i];
+        const key = fn(item);
+        if (!result[key]) {
+          result[key] = [];
+        }
+        result[key].push(item);
+      }
+      return result;
     };
 
-    const groupedById = groupBy(docs, doc => doc[prop]);
+    const groupedById = groupBy(doc => doc[prop], docs);
     return keys.map(key => groupedById[key] || []);
   }
 }
