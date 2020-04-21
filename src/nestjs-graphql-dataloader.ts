@@ -45,12 +45,12 @@ export class DataLoaderInterceptor implements NestInterceptor {
     if (ctx[NEST_LOADER_CONTEXT_KEY] === undefined) {
       ctx[NEST_LOADER_CONTEXT_KEY] = {
         contextId: ContextIdFactory.create(),
-        getLoader: (type: string): Promise<NestDataLoader<any, any>> => {
+        getLoader: <T, V>(type: string): Promise<NestDataLoader<T, V>> => {
           if (ctx[type] === undefined) {
             try {
               ctx[type] = (async () => {
                 return (
-                  await this.moduleRef.resolve<NestDataLoader<any, any>>(
+                  await this.moduleRef.resolve<NestDataLoader<T, V>>(
                     type,
                     ctx[NEST_LOADER_CONTEXT_KEY].contextId,
                     { strict: false },
@@ -75,8 +75,8 @@ export class DataLoaderInterceptor implements NestInterceptor {
  * The decorator to be used within your graphql method.
  */
 export const Loader = createParamDecorator(
-  // tslint:disable-next-line: ban-types
   (data: string | Function, context: ExecutionContext) => {
+    // console.log('Loader data: ', (data as any).name);
     const name = typeof data === 'string' ? data : data?.name;
     if (!name) {
       throw new InternalServerErrorException(
@@ -85,7 +85,8 @@ export const Loader = createParamDecorator(
     }
 
     const ctx = GqlExecutionContext.create(context).getContext();
-    if (!name || !ctx[NEST_LOADER_CONTEXT_KEY]) {
+    // console.log('Loader ctx: ', ctx[NEST_LOADER_CONTEXT_KEY]);
+    if (!ctx[NEST_LOADER_CONTEXT_KEY]) {
       throw new InternalServerErrorException(
         `You should provide interceptor ${DataLoaderInterceptor.name} globally with ${APP_INTERCEPTOR}`,
       );
@@ -99,6 +100,13 @@ interface IOrderedNestDataLoaderOptions<ID, Type> {
   propertyKey?: string;
   query: (keys: readonly ID[]) => Promise<Type[]>;
   typeName?: string;
+}
+
+interface IEnsureOrderOptions<ID, Type> {
+  docs: Type[];
+  keys: readonly ID[];
+  prop: string;
+  error: (key) => string;
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -125,7 +133,7 @@ export abstract class OrderedArrayOfObjectDataLoader<ID, Type>
     });
   }
 
-  protected ensureOrder(options) {
+  protected ensureOrder(options: IEnsureOrderOptions<ID, Type>) {
     const {
       docs,
       keys,
@@ -150,6 +158,8 @@ export abstract class OrderedArrayOfObjectDataLoader<ID, Type>
 export abstract class OrderedArrayOfArrayDataLoader<ID, Type>
   implements NestDataLoader<ID, Type> {
   protected abstract getOptions: () => IOrderedNestDataLoaderOptions<ID, Type>;
+  /* protected abstract loadObject: () => any;
+  protected abstract loadArray: () => any; */
 
   public generateDataLoader() {
     return this.createLoader(this.getOptions());
@@ -171,7 +181,7 @@ export abstract class OrderedArrayOfArrayDataLoader<ID, Type>
   }
 
   // https://github.com/graphql/dataloader/issues/66#issuecomment-386252044
-  protected ensureOrder(options) {
+  protected ensureOrder(options: IEnsureOrderOptions<ID, Type>) {
     const {
       docs,
       keys,
@@ -191,7 +201,7 @@ export abstract class OrderedArrayOfArrayDataLoader<ID, Type>
     const groupBy = (fn, list) => {
       // TODO: arguments.length buggy...
       // if (arguments.length === 1) return _list => groupBy(fn, _list);
-      const result = {};
+      const result: any = {};
       for (let i = 0; i < list.length; i++) {
         const item = list[i];
         const key = fn(item);
@@ -204,6 +214,7 @@ export abstract class OrderedArrayOfArrayDataLoader<ID, Type>
     };
 
     const groupedById = groupBy(doc => doc[prop], docs);
-    return keys.map(key => groupedById[key] || []);
+    const ttt = keys.map(key => groupedById[key] || []);
+    return ttt;
   }
 }
