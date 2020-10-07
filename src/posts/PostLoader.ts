@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as DataLoader from 'dataloader';
+import DataLoader from 'dataloader';
 import { NestDataLoader } from '../nestjs-graphql-dataloader';
 import { Post } from './models/post.model';
 import { PostsService } from './posts.service';
